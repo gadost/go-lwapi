@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/gadost/go-lwapi"
-	"github.com/steinfletcher/apitest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,22 +19,6 @@ func TestMakeQuery(t *testing.T) {
 }
 
 var v = make(map[string]interface{})
-
-func TestServers_(t *testing.T) {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		msg := `{"message": "hello"}`
-		_, _ = w.Write([]byte(msg))
-		w.WriteHeader(http.StatusOK)
-	}
-
-	apitest.New(). // configuration
-			HandlerFunc(handler).
-			Get("/message"). // request
-			Expect(t).       // expectations
-			Body(`{"message": "hello"}`).
-			Status(http.StatusOK).
-			End()
-}
 
 func TestServers(t *testing.T) {
 	// Start a local HTTP server
