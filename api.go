@@ -15,8 +15,9 @@ const (
 	ServiceTypeVirtualServer = "virtualServers"
 )
 
-//New Api
+var NilPayload []byte
 
+//New Api
 func New(token string) *Token {
 	return &Token{
 		Token: token,

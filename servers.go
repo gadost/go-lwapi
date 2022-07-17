@@ -6,8 +6,6 @@ import (
 	"fmt"
 )
 
-var NilPayload []byte
-
 // List your Dedicated Servers. This api call supports pagination.
 // Use the limit and offset query string parameters to paginate through all your dedicated servers.
 // Every server object in the json response lists a few properties of a server.
