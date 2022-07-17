@@ -1,7 +1,9 @@
 language: go
 
 go:
-- "1.18"
+  - "1.18"
+  - release
+  - tip
 
 before_install:
   - go get -t -v ./...
