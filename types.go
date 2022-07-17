@@ -346,6 +346,7 @@ type ServerIPs struct {
 }
 
 type UpdateIPRequest struct {
+	// DetectionProfile one of "ADVANCED_DEFAULT" "ADVANCED_LOW_UDP" "ADVANCED_MED_UDP"
 	DetectionProfile string `json:"detectionProfile"`
 	ReverseLookup    string `json:"reverseLookup"`
 }
@@ -493,15 +494,15 @@ type HardwareScanJob struct {
 }
 
 type InstallationJob struct {
-	ControlPanelID    string                     `json:"controlPanelId"`
-	Device            string                     `json:"device"`
-	Hostname          string                     `json:"hostname"`
-	OperatingSystemID string                     `json:"operatingSystemId"`
-	Partitions        []InstallationJobPartition `json:"partitions"`
-	SSHKeys           string                     `json:"sshKeys"`
+	ControlPanelID    string      `json:"controlPanelId"`
+	Device            string      `json:"device"`
+	Hostname          string      `json:"hostname"`
+	OperatingSystemID string      `json:"operatingSystemId"`
+	Partitions        []Partition `json:"partitions"`
+	SSHKeys           string      `json:"sshKeys"`
 }
 
-type InstallationJobPartition struct {
+type Partition struct {
 	Bootable   bool   `json:"bootable,omitempty"`
 	Filesystem string `json:"filesystem"`
 	Mountpoint string `json:"mountpoint,omitempty"`
@@ -546,4 +547,154 @@ type Credential struct {
 
 type Password struct {
 	Password string `json:"password"`
+}
+
+type MetricsMetadata struct {
+	Aggregation string    `json:"aggregation"`
+	From        time.Time `json:"from"`
+	Granularity string    `json:"granularity"`
+	To          time.Time `json:"to"`
+}
+
+type Metrics struct {
+	Metadata MetricsMetadata `json:"_metadata"`
+	Metrics  Metric          `json:"metrics"`
+
+	Error
+}
+
+type Metric struct {
+	DownPublic MetricsValues `json:"DOWN_PUBLIC"`
+	UpPublic   MetricsValues `json:"UP_PUBLIC"`
+}
+type MetricsValues struct {
+	Unit   string         `json:"unit"`
+	Values []MetricsValue `json:"values"`
+}
+
+type MetricsValue struct {
+	Timestamp time.Time `json:"timestamp"`
+	Value     int       `json:"value"`
+}
+
+type BandwidthNotification struct {
+	Metadata                      Metadata              `json:"_metadata"`
+	BandwidthNotificationSettings []NotificationSetting `json:"bandwidthNotificationSettings"`
+}
+
+type DatatrafficNotification struct {
+	Metadata                        Metadata              `json:"_metadata"`
+	DatatrafficNotificationSettings []NotificationSetting `json:"datatrafficNotificationSettings"`
+}
+
+type Action struct {
+	LastTriggeredAt time.Time `json:"lastTriggeredAt"`
+	Type            string    `json:"type"`
+}
+
+type NotificationSetting struct {
+	Actions             []Action  `json:"actions"`
+	Frequency           string    `json:"frequency"`
+	ID                  string    `json:"id"`
+	LastCheckedAt       time.Time `json:"lastCheckedAt"`
+	Threshold           string    `json:"threshold"`
+	ThresholdExceededAt time.Time `json:"thresholdExceededAt"`
+	Unit                string    `json:"unit"`
+}
+
+type NotificationRequest struct {
+	Frequency string `json:"frequency"`
+	Threshold string `json:"threshold"`
+	Unit      string `json:"unit"`
+}
+
+type NotificationResponse struct {
+	Actions             []Action  `json:"actions"`
+	Frequency           string    `json:"frequency"`
+	ID                  string    `json:"id"`
+	LastCheckedAt       time.Time `json:"lastCheckedAt"`
+	Threshold           string    `json:"threshold"`
+	ThresholdExceededAt time.Time `json:"thresholdExceededAt"`
+	Unit                string    `json:"unit"`
+
+	Error
+}
+
+type DDoSStatus struct {
+	Nulling   string `json:"nulling"`
+	Scrubbing string `json:"scrubbing"`
+
+	Error
+}
+
+type PowerStatus struct {
+	Ipmi IPMIPowerStatus `json:"ipmi"`
+	Pdu  PduPowerStatus  `json:"pdu"`
+
+	Error
+}
+
+type IPMIPowerStatus struct {
+	Status string `json:"status"`
+}
+
+type PduPowerStatus struct {
+	Status string `json:"status"`
+}
+
+type OperatingSystems struct {
+	Metadata         Metadata          `json:"_metadata"`
+	OperatingSystems []OperatingSystem `json:"operatingSystems"`
+
+	Error
+}
+
+type OperatingSystem struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type OSParams struct {
+	Architecture         string           `json:"architecture"`
+	Configurable         bool             `json:"configurable"`
+	Defaults             OSParamsDefaults `json:"defaults"`
+	Family               string           `json:"family"`
+	Features             []string         `json:"features"`
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	SupportedBootDevices []string         `json:"supportedBootDevices"`
+	SupportedFileSystems []string         `json:"supportedFileSystems"`
+	Type                 string           `json:"type"`
+	Version              string           `json:"version"`
+
+	Error
+}
+
+type OSParamsDefaults struct {
+	Device     string      `json:"device"`
+	Partitions []Partition `json:"partitions"`
+}
+
+type ControlPanels struct {
+	Metadata      Metadata       `json:"_metadata"`
+	ControlPanels []ControlPanel `json:"controlPanels"`
+
+	Error
+}
+
+type ControlPanel struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type RescueImages struct {
+	Metadata     Metadata      `json:"_metadata"`
+	RescueImages []RescueImage `json:"rescueImages"`
+
+	Error
+}
+
+type RescueImage struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }

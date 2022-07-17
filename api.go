@@ -82,14 +82,12 @@ func (a *Api) NewRequest(payload []byte, uri string, reqType string) ([]byte, er
 	return bodyResp, err
 }
 
-func MakeQuery(params []map[string]interface{}) string {
+func MakeQuery(params map[string]interface{}) string {
 	query := "?"
 	if len(params) > 0 {
-		for _, p := range params {
-			for k, v := range p {
-				if fmt.Sprint(v) != "" {
-					query += fmt.Sprintf("%s=%s", k, v)
-				}
+		for k, v := range params {
+			if fmt.Sprint(v) != "" {
+				query += fmt.Sprintf("%s=%v", k, v)
 			}
 		}
 	} else {
