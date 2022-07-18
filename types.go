@@ -13,7 +13,14 @@ type Error struct {
 	Reference     string `json:"reference"`
 }
 
-type Api struct {
+type VSApi struct {
+	BaseURL     string
+	conn        *http.Client
+	Token       string
+	ServiceType string
+}
+
+type DSApi struct {
 	BaseURL     string
 	conn        *http.Client
 	Token       string

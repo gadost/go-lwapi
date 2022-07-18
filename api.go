@@ -28,8 +28,8 @@ func New(token string) *Token {
 
 }
 
-func (t *Token) VirtualServers() *Api {
-	return &Api{
+func (t *Token) VirtualServers() *VSApi {
+	return &VSApi{
 		BaseURL:     BaseURL,
 		conn:        connect(),
 		Token:       t.Token,
@@ -37,8 +37,8 @@ func (t *Token) VirtualServers() *Api {
 	}
 }
 
-func (t *Token) DedicatedServers() *Api {
-	return &Api{
+func (t *Token) DedicatedServers() *DSApi {
+	return &DSApi{
 		BaseURL:     BaseURL,
 		conn:        connect(),
 		Token:       t.Token,
@@ -55,18 +55,36 @@ func connect() *http.Client {
 	return &http.Client{Transport: tl}
 }
 
-func (a *Api) entrypoint() string {
-	switch a.ServiceType {
-	case ServiceTypeDedicated:
-		return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeDedicated, APIVer)
-	case ServiceTypeVirtualServer:
-		return fmt.Sprintf("%s/%s/%s/%s", a.BaseURL, ServiceTypeCloud, APIVer, ServiceTypeVirtualServer)
-	default:
-		return ""
-	}
+func (a *VSApi) entrypoint() string {
+	return fmt.Sprintf("%s/%s/%s/%s", a.BaseURL, ServiceTypeCloud, APIVer, ServiceTypeVirtualServer)
 }
 
-func (a *Api) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
+func (a *DSApi) entrypoint() string {
+	return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeDedicated, APIVer)
+}
+
+func (a *VSApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
+	body := bytes.NewReader(payload)
+	req, err := http.NewRequest(reqType, a.entrypoint()+uri, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("x-lsw-auth", a.Token)
+
+	resp, err := a.conn.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	bodyResp, err := io.ReadAll(resp.Body)
+
+	return bodyResp, err
+}
+
+func (a *DSApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
 	body := bytes.NewReader(payload)
 	req, err := http.NewRequest(reqType, a.entrypoint()+uri, body)
 	if err != nil {

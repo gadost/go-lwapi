@@ -9,7 +9,7 @@ import (
 // Use the limit and offset query string parameters to paginate through all your dedicated servers.
 // Every server object in the json response lists a few properties of a server.
 // Use the single resouce api call to get more details for a single server.
-func (a *Api) Servers(queryParams map[string]interface{}) (*Servers, error) {
+func (a *DSApi) Servers(queryParams map[string]interface{}) (*Servers, error) {
 	query := MakeQuery(queryParams)
 	bodyResp, err := a.NewRequest(NilPayload, "/servers"+query, "GET")
 
@@ -19,7 +19,7 @@ func (a *Api) Servers(queryParams map[string]interface{}) (*Servers, error) {
 }
 
 // Use this API to get information about a single server.
-func (a *Api) Server(serverID uint64) (*Server, error) {
+func (a *DSApi) Server(serverID uint64) (*Server, error) {
 	uri := fmt.Sprintf("/servers/%d", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -29,7 +29,7 @@ func (a *Api) Server(serverID uint64) (*Server, error) {
 }
 
 // Update the reference for a server.
-func (a *Api) ServerReferenceUpdate(serverID uint64, params *Reference) (*Server, error) {
+func (a *DSApi) ServerReferenceUpdate(serverID uint64, params *Reference) (*Server, error) {
 	uri := fmt.Sprintf("/servers/%d", serverID)
 	payload, _ := json.Marshal(params)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
@@ -41,7 +41,7 @@ func (a *Api) ServerReferenceUpdate(serverID uint64, params *Reference) (*Server
 
 // This information is generated when running a hardware scan for your server.
 // A hardware scan collects hardware information about your system.
-func (a *Api) ServerHardwareInformation(serverID uint64) (*HardwareInformation, error) {
+func (a *DSApi) ServerHardwareInformation(serverID uint64) (*HardwareInformation, error) {
 	uri := fmt.Sprintf("/servers/%d/hardwareInfo", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -51,7 +51,7 @@ func (a *Api) ServerHardwareInformation(serverID uint64) (*HardwareInformation, 
 }
 
 // List all IP Addresses associated with this server. Optionally filtered.
-func (a *Api) ServerIPList(
+func (a *DSApi) ServerIPList(
 	serverID uint64, queryParams map[string]interface{}) (*ServerIPs, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/ips%s", serverID, query)
@@ -63,7 +63,7 @@ func (a *Api) ServerIPList(
 }
 
 // Get a single IP address associated with this server.
-func (a *Api) ServerIP(serverID uint64, serverIP string) (*ServerIP, error) {
+func (a *DSApi) ServerIP(serverID uint64, serverIP string) (*ServerIP, error) {
 	uri := fmt.Sprintf("/servers/%d/ips/%s", serverID, serverIP)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -75,7 +75,7 @@ func (a *Api) ServerIP(serverID uint64, serverIP string) (*ServerIP, error) {
 // Update the reverse lookup or DDoS detection profile for the ip address.
 // DDoS detection profiles can only be changed if the IP address is protected using
 // Advanced DDoS protection.
-func (a *Api) ServerIPUpdate(serverID uint64, serverIP string, params *UpdateIPRequest) (
+func (a *DSApi) ServerIPUpdate(serverID uint64, serverIP string, params *UpdateIPRequest) (
 	*ServerIP, error) {
 	if err := params.Validate(); err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (a *Api) ServerIPUpdate(serverID uint64, serverIP string, params *UpdateIPR
 
 // Null the given IP address.
 // It might take a few minutes before the change is propagated across the network.
-func (a *Api) ServerIPNull(serverID uint64, serverIP string) (*ServerIP, error) {
+func (a *DSApi) ServerIPNull(serverID uint64, serverIP string) (*ServerIP, error) {
 	uri := fmt.Sprintf("/servers/%d/ips/%s/null", serverID, serverIP)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -102,7 +102,7 @@ func (a *Api) ServerIPNull(serverID uint64, serverIP string) (*ServerIP, error) 
 
 // Remove an existing null route for the given IP address.
 // It might take a few minutes before the change is propagated across the network.
-func (a *Api) ServerIPUnNull(serverID uint64, serverIP string) (*ServerIP, error) {
+func (a *DSApi) ServerIPUnNull(serverID uint64, serverIP string) (*ServerIP, error) {
 	uri := fmt.Sprintf("/servers/%d/ips/%s/unnull", serverID, serverIP)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -112,7 +112,7 @@ func (a *Api) ServerIPUnNull(serverID uint64, serverIP string) (*ServerIP, error
 }
 
 // Show all null route history for any ips associated with this server.
-func (a *Api) ServerIPNullHistory(
+func (a *DSApi) ServerIPNullHistory(
 	serverID uint64, serverIP string, queryParams map[string]interface{}) (
 	*NullHistory, error) {
 	query := MakeQuery(queryParams)
@@ -125,7 +125,7 @@ func (a *Api) ServerIPNullHistory(
 }
 
 // List all network interfaces for this server, including their current status.
-func (a *Api) ServerNetworkInterfaces(serverID uint64) (*NetworkInterfacesList, error) {
+func (a *DSApi) ServerNetworkInterfaces(serverID uint64) (*NetworkInterfacesList, error) {
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -135,7 +135,7 @@ func (a *Api) ServerNetworkInterfaces(serverID uint64) (*NetworkInterfacesList, 
 }
 
 // Close all network interfaces for this server.
-func (a *Api) ServerNetworkInterfacesClose(serverID uint64) (*NetworkInterfacesList, error) {
+func (a *DSApi) ServerNetworkInterfacesClose(serverID uint64) (*NetworkInterfacesList, error) {
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces/close", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -145,7 +145,7 @@ func (a *Api) ServerNetworkInterfacesClose(serverID uint64) (*NetworkInterfacesL
 }
 
 // Open all network interfaces of this server.
-func (a *Api) ServerNetworkInterfacesOpen(serverID uint64) (*NetworkInterfacesList, error) {
+func (a *DSApi) ServerNetworkInterfacesOpen(serverID uint64) (*NetworkInterfacesList, error) {
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces/open", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -155,7 +155,7 @@ func (a *Api) ServerNetworkInterfacesOpen(serverID uint64) (*NetworkInterfacesLi
 }
 
 // List the network interfaces of the given type of this server, including their status.
-func (a *Api) ServerNetworkInterface(serverID uint64, networkType NetworkType) (*NetworkInterface, error) {
+func (a *DSApi) ServerNetworkInterface(serverID uint64, networkType NetworkType) (*NetworkInterface, error) {
 	if err := networkType.Validate(); err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (a *Api) ServerNetworkInterface(serverID uint64, networkType NetworkType) (
 }
 
 // Close all network interfaces of this server.
-func (a *Api) ServerNetworkInterfaceClose(serverID uint64, networkType NetworkType) (*Error, error) {
+func (a *DSApi) ServerNetworkInterfaceClose(serverID uint64, networkType NetworkType) (*Error, error) {
 	if err := networkType.Validate(); err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (a *Api) ServerNetworkInterfaceClose(serverID uint64, networkType NetworkTy
 }
 
 // Open all network interfaces of the given type for this server.
-func (a *Api) ServerNetworkInterfaceOpen(serverID uint64, networkType NetworkType) (*Error, error) {
+func (a *DSApi) ServerNetworkInterfaceOpen(serverID uint64, networkType NetworkType) (*Error, error) {
 	if err := networkType.Validate(); err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func (a *Api) ServerNetworkInterfaceOpen(serverID uint64, networkType NetworkTyp
 // It takes a few minutes before the server has been removed from the private network.
 //To get the current status of the server you can call /bareMetals/v2/servers/{serverId}.
 // While the server is being removed the status changes to REMOVING.
-func (a *Api) ServerPrivateNetworkDelete(serverID uint64, privateNetworkID int) (*Error, error) {
+func (a *DSApi) ServerPrivateNetworkDelete(serverID uint64, privateNetworkID int) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/privateNetworks/%d", serverID, privateNetworkID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "DELETE")
 
@@ -209,7 +209,7 @@ func (a *Api) ServerPrivateNetworkDelete(serverID uint64, privateNetworkID int) 
 // It takes a few minutes before the server has access to the private network.
 // To get the current status of the server you can call api.Server(ID).
 // Once the server is added to the private network the status changes from CONFIGURING to CONFIGURED.
-func (a *Api) ServerPrivateNetworkAdd(serverID uint64, privateNetworkID int, linkSpeed int) (*Error, error) {
+func (a *DSApi) ServerPrivateNetworkAdd(serverID uint64, privateNetworkID int, linkSpeed int) (*Error, error) {
 	ls := &LinkSpeed{
 		LinkSpeed: linkSpeed,
 	}
@@ -228,7 +228,7 @@ func (a *Api) ServerPrivateNetworkAdd(serverID uint64, privateNetworkID int, lin
 }
 
 // Delete a DHCP reservation for this server.
-func (a *Api) ServerDHCPLeaseDelete(serverID uint64) (*Error, error) {
+func (a *DSApi) ServerDHCPLeaseDelete(serverID uint64) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/leases", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "DELETE")
 
@@ -238,7 +238,7 @@ func (a *Api) ServerDHCPLeaseDelete(serverID uint64) (*Error, error) {
 }
 
 // Please note that this will only show reservations for the public network interface.
-func (a *Api) ServerDHCPLeases(serverID uint64) (*ServerDHCPLeases, error) {
+func (a *DSApi) ServerDHCPLeases(serverID uint64) (*ServerDHCPLeases, error) {
 	uri := fmt.Sprintf("/servers/%d/leases", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -249,7 +249,7 @@ func (a *Api) ServerDHCPLeases(serverID uint64) (*ServerDHCPLeases, error) {
 
 // After rebooting your server it will acquire this DHCP reservation and boot from the specified bootfile url.
 // Please note that this API call will not reboot or power cycle your server.
-func (a *Api) ServerDHCPLeaseNew(serverID uint64, params *ServerDHCPLeaseNew) (*Error, error) {
+func (a *DSApi) ServerDHCPLeaseNew(serverID uint64, params *ServerDHCPLeaseNew) (*Error, error) {
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/leases", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -262,7 +262,7 @@ func (a *Api) ServerDHCPLeaseNew(serverID uint64, params *ServerDHCPLeaseNew) (*
 // Canceling an active job will trigger the onfail flow
 // of the current job often resulting in a server reboot.
 // If you do not want the server state to change expire the active job instead.
-func (a *Api) ServerActiveJobCancel(serverID uint64) (*Job, error) {
+func (a *DSApi) ServerActiveJobCancel(serverID uint64) (*Job, error) {
 	uri := fmt.Sprintf("/servers/%d/cancelActiveJob", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -275,7 +275,7 @@ func (a *Api) ServerActiveJobCancel(serverID uint64) (*Job, error) {
 // of the server and is merely an administrative action.
 // Often you want to cancel the job, resulting in a server reboot.
 // In that case\nuse the /cancelActiveJob API call instead.
-func (a *Api) ServerActiveJobExpire(serverID uint64) (*Job, error) {
+func (a *DSApi) ServerActiveJobExpire(serverID uint64) (*Job, error) {
 	uri := fmt.Sprintf("/servers/%d/expireActiveJob", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -288,7 +288,7 @@ func (a *Api) ServerActiveJobExpire(serverID uint64) (*Job, error) {
 // A hardware scan will require a reboot of your server.
 // The contents of your hard drive won't be altered in any way.
 // After a successful hardware scan your server is booted back into the original operating system.
-func (a *Api) ServerHardwareScan(serverID uint64, powerCycle bool, callbackUrl string) (*Job, error) {
+func (a *DSApi) ServerHardwareScan(serverID uint64, powerCycle bool, callbackUrl string) (*Job, error) {
 	payload, _ := json.Marshal(&HardwareScanJob{
 		PowerCycle:  powerCycle,
 		CallbackUrl: callbackUrl,
@@ -307,7 +307,7 @@ func (a *Api) ServerHardwareScan(serverID uint64, powerCycle bool, callbackUrl s
 // You are now able to target a specific diskset, like SATA1TB, SATA2TB, SSD256GB, etc.
 // To see which disksets are available in your server check the /v2/servers/{serverId} endpoint
 // and look for the corresponding diskset id from the hdd array.
-func (a *Api) ServerInstallationLaunch(serverID uint64, params *InstallationJob) (*Job, error) {
+func (a *DSApi) ServerInstallationLaunch(serverID uint64, params *InstallationJob) (*Job, error) {
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}
@@ -324,7 +324,7 @@ func (a *Api) ServerInstallationLaunch(serverID uint64, params *InstallationJob)
 // An IPMI reset will require a reboot of your server.
 // The contents of your hard drive won't be altered in any way.
 // After a successful IPMI reset your server is booted back into the original operating system."
-func (a *Api) ServerIPMIReset(serverID uint64, params *CallbackURL) (*Job, error) {
+func (a *DSApi) ServerIPMIReset(serverID uint64, params *CallbackURL) (*Job, error) {
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/ipmiReset", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -335,7 +335,7 @@ func (a *Api) ServerIPMIReset(serverID uint64, params *CallbackURL) (*Job, error
 }
 
 // List all jobs for this server.
-func (a *Api) ServerJobs(serverID uint64) (*Jobs, error) {
+func (a *DSApi) ServerJobs(serverID uint64) (*Jobs, error) {
 	uri := fmt.Sprintf("/servers/%d/jobs", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -345,7 +345,7 @@ func (a *Api) ServerJobs(serverID uint64) (*Jobs, error) {
 }
 
 // Get a single job for this server.
-func (a *Api) ServerJob(serverID uint64, jobID int) (*Job, error) {
+func (a *DSApi) ServerJob(serverID uint64, jobID int) (*Job, error) {
 	uri := fmt.Sprintf("/servers/%d/jobs/%d", serverID, jobID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -365,7 +365,7 @@ func (a *Api) ServerJob(serverID uint64, jobID int) (*Job, error) {
 // After this reboot the server will boot into the existing operating system.
 // To get a list of available rescue images,
 // you could do so by sending a GET request to /bareMetals/v2/rescueImages.
-func (a *Api) ServerRescueMode(serverID uint64, params *RescueModeJob) (*Job, error) {
+func (a *DSApi) ServerRescueMode(serverID uint64, params *RescueModeJob) (*Job, error) {
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}
@@ -381,7 +381,7 @@ func (a *Api) ServerRescueMode(serverID uint64, params *RescueModeJob) (*Job, er
 // The credentials API allows you to store usernames and passwords securely.
 // During (re)installations, rescue modes and ipmi resets the newly generated passwords
 // are stored and can be retrieved using this API.
-func (a *Api) ServerCredentials(
+func (a *DSApi) ServerCredentials(
 	serverID uint64, queryParams map[string]interface{}) (*Credentials, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/credentials%s", serverID, query)
@@ -395,7 +395,7 @@ func (a *Api) ServerCredentials(
 // Password will NOT be updated on the server.
 // The ability to update credentials is for convenience only.
 // It provides a secure way to communicate passwords with Leaseweb engineers in case support is required.
-func (a *Api) ServerCredentialNew(serverID uint64, params *Credential) (*Credential, error) {
+func (a *DSApi) ServerCredentialNew(serverID uint64, params *Credential) (*Credential, error) {
 	if err := params.Validate(); err != nil {
 		return nil, err
 	}
@@ -409,7 +409,7 @@ func (a *Api) ServerCredentialNew(serverID uint64, params *Credential) (*Credent
 }
 
 // List all the credentials filtered by the specified type that are associated with this server.
-func (a *Api) ServerTypedCredentials(
+func (a *DSApi) ServerTypedCredentials(
 	serverID uint64, credType CredType, queryParams map[string]interface{}) (*Credentials, error) {
 	if err := credType.Validate(); err != nil {
 		return nil, err
@@ -425,7 +425,7 @@ func (a *Api) ServerTypedCredentials(
 
 // This action is purely administrative and will only remove the username
 // and password associated with this resource from our database.
-func (a *Api) ServerUsernameCredentialDelete(
+func (a *DSApi) ServerUsernameCredentialDelete(
 	serverID uint64, credType CredType, username string) (*Error, error) {
 	if err := credType.Validate(); err != nil {
 		return nil, err
@@ -440,7 +440,7 @@ func (a *Api) ServerUsernameCredentialDelete(
 
 // View the password for the given credential, identified by type and username.
 // Auto generated credentials (during a re-install, rescue mode or ipmi reset can be found here).
-func (a *Api) ServerUsernameTypedCredentials(
+func (a *DSApi) ServerUsernameTypedCredentials(
 	serverID uint64, credType CredType, username string) (*Credential, error) {
 	if err := credType.Validate(); err != nil {
 		return nil, err
@@ -457,7 +457,7 @@ func (a *Api) ServerUsernameTypedCredentials(
 // In order to change those remove this credentials and create a new one.
 // This action is purely administrative and will only update the password
 // associated with this resource in our database.
-func (a *Api) ServerCredentialUpdate(
+func (a *DSApi) ServerCredentialUpdate(
 	serverID uint64, credType CredType, username string, params *Password) (*Credential, error) {
 	if err := credType.Validate(); err != nil {
 		return nil, err
@@ -476,7 +476,7 @@ func (a *Api) ServerCredentialUpdate(
 }
 
 // At this moment only bandwidth information for the public interface is supported.
-func (a *Api) ServerBandwidthMetrics(serverID uint64, params *BandwidthMetrics) (*Metrics, error) {
+func (a *DSApi) ServerBandwidthMetrics(serverID uint64, params *BandwidthMetrics) (*Metrics, error) {
 	var queryParams map[string]interface{}
 	if ok, err := params.Validate(); err != nil {
 		return nil, err
@@ -494,7 +494,7 @@ func (a *Api) ServerBandwidthMetrics(serverID uint64, params *BandwidthMetrics) 
 }
 
 // At this moment only bandwidth information for the public interface is supported.
-func (a *Api) ServerDatatraficMetrics(serverID uint64, params *DatatrafficMetrics) (*Metrics, error) {
+func (a *DSApi) ServerDatatraficMetrics(serverID uint64, params *DatatrafficMetrics) (*Metrics, error) {
 	var queryParams map[string]interface{}
 	if ok, err := params.Validate(); err != nil {
 		return nil, err
@@ -512,7 +512,7 @@ func (a *Api) ServerDatatraficMetrics(serverID uint64, params *DatatrafficMetric
 }
 
 // List all bandwidth notification settings for this server.
-func (a *Api) ServerBandwidthNotifications(
+func (a *DSApi) ServerBandwidthNotifications(
 	serverID uint64, queryParams map[string]interface{}) (*BandwidthNotification, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/bandwidth%s", serverID, query)
@@ -524,7 +524,7 @@ func (a *Api) ServerBandwidthNotifications(
 }
 
 // Create a new bandwidth notification setting for this server.
-func (a *Api) ServerBandwidthNotificationNew(
+func (a *DSApi) ServerBandwidthNotificationNew(
 	serverID uint64, params *NotificationRequest) (*NotificationResponse, error) {
 	if err := params.Validete(); err != nil {
 		return nil, err
@@ -539,7 +539,7 @@ func (a *Api) ServerBandwidthNotificationNew(
 }
 
 // Remove a Bandwidth Notification setting for this server.
-func (a *Api) ServerBandwidthNotificationDelete(serverID uint64, notificationSettingId int) (*Error, error) {
+func (a *DSApi) ServerBandwidthNotificationDelete(serverID uint64, notificationSettingId int) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/bandwidth/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "DELETE")
 
@@ -549,7 +549,7 @@ func (a *Api) ServerBandwidthNotificationDelete(serverID uint64, notificationSet
 }
 
 // Get a bandwidth notification setting for this server.
-func (a *Api) ServerBandwidthNotification(
+func (a *DSApi) ServerBandwidthNotification(
 	serverID uint64, notificationSettingId int) (*NotificationResponse, error) {
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/bandwidth/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -560,7 +560,7 @@ func (a *Api) ServerBandwidthNotification(
 }
 
 // Update an existing bandwidth notification setting for this server.
-func (a *Api) ServerBandwidthNotificationUpdate(
+func (a *DSApi) ServerBandwidthNotificationUpdate(
 	serverID uint64, notificationSettingId int, params *NotificationRequest) (*NotificationResponse, error) {
 	if err := params.Validete(); err != nil {
 		return nil, err
@@ -575,7 +575,7 @@ func (a *Api) ServerBandwidthNotificationUpdate(
 }
 
 // List all datatraffic notification settings for this server.
-func (a *Api) ServerDatatrafficNotifications(
+func (a *DSApi) ServerDatatrafficNotifications(
 	serverID uint64, queryParams map[string]interface{}) (*DatatrafficNotification, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/datatraffic%s", serverID, query)
@@ -587,7 +587,7 @@ func (a *Api) ServerDatatrafficNotifications(
 }
 
 // Create a new datatraffic notification setting for this server.
-func (a *Api) ServerDatatrafficNotificationNew(
+func (a *DSApi) ServerDatatrafficNotificationNew(
 	serverID uint64, params *DataTrafficNotificationRequest) (*NotificationResponse, error) {
 	if err := params.Validete(); err != nil {
 		return nil, err
@@ -602,7 +602,7 @@ func (a *Api) ServerDatatrafficNotificationNew(
 }
 
 // Delete the given datatraffic notification setting for this server.
-func (a *Api) ServerDatatrafficNotificationDelete(serverID uint64, notificationSettingId int) (*Error, error) {
+func (a *DSApi) ServerDatatrafficNotificationDelete(serverID uint64, notificationSettingId int) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/datatraffic/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "DELETE")
 
@@ -612,7 +612,7 @@ func (a *Api) ServerDatatrafficNotificationDelete(serverID uint64, notificationS
 }
 
 // Get a datatraffic notification setting for this server.
-func (a *Api) ServerDatatrafficNotification(
+func (a *DSApi) ServerDatatrafficNotification(
 	serverID uint64, notificationSettingId int) (*NotificationResponse, error) {
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/datatraffic/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -623,7 +623,7 @@ func (a *Api) ServerDatatrafficNotification(
 }
 
 // Update an existing datatraffic notification setting for this server.
-func (a *Api) ServerDatatrafficNotificationUpdate(
+func (a *DSApi) ServerDatatrafficNotificationUpdate(
 	serverID uint64,
 	notificationSettingId int,
 	params *DataTrafficNotificationRequest) (*NotificationResponse, error) {
@@ -641,7 +641,7 @@ func (a *Api) ServerDatatrafficNotificationUpdate(
 
 // Show all DDoS Protection related notification settings for this server.
 // These settings control if you want to be notified via email in case a DDoS was mitigated.
-func (a *Api) ServerDDoSNotification(serverID uint64) (*DDoSStatus, error) {
+func (a *DSApi) ServerDDoSNotification(serverID uint64) (*DDoSStatus, error) {
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/ddos", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -651,7 +651,7 @@ func (a *Api) ServerDDoSNotification(serverID uint64) (*DDoSStatus, error) {
 }
 
 // Update your DDoS notification settings for this server.
-func (a *Api) ServerDDoSNotificationUpdate(serverID uint64, params *DDoSStatus) (*Error, error) {
+func (a *DSApi) ServerDDoSNotificationUpdate(serverID uint64, params *DDoSStatus) (*Error, error) {
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/ddos", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
@@ -662,7 +662,7 @@ func (a *Api) ServerDDoSNotificationUpdate(serverID uint64, params *DDoSStatus) 
 }
 
 // Powercyle the server.
-func (a *Api) ServerPowerCycle(serverID uint64) (*Error, error) {
+func (a *DSApi) ServerPowerCycle(serverID uint64) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/powerCycle", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -680,7 +680,7 @@ func (a *Api) ServerPowerCycle(serverID uint64) (*Error, error) {
 // The ipmi object describes the power status by quering the remote management interface of your server.
 // Note that pdu.status can report on but your server can still be powered off if
 // it was shutdown via IPMI for example.
-func (a *Api) ServerPowerStatus(serverID uint64) (*PowerStatus, error) {
+func (a *DSApi) ServerPowerStatus(serverID uint64) (*PowerStatus, error) {
 	uri := fmt.Sprintf("/servers/%d/powerCycle", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -690,7 +690,7 @@ func (a *Api) ServerPowerStatus(serverID uint64) (*PowerStatus, error) {
 }
 
 // Power off the given server.
-func (a *Api) ServerPowerOff(serverID uint64) (*Error, error) {
+func (a *DSApi) ServerPowerOff(serverID uint64) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/powerOff", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -700,7 +700,7 @@ func (a *Api) ServerPowerOff(serverID uint64) (*Error, error) {
 }
 
 // Power on the given server.
-func (a *Api) ServerPowerOn(serverID uint64) (*Error, error) {
+func (a *DSApi) ServerPowerOn(serverID uint64) (*Error, error) {
 	uri := fmt.Sprintf("/servers/%d/powerOn", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -711,7 +711,7 @@ func (a *Api) ServerPowerOn(serverID uint64) (*Error, error) {
 
 // An id of a operating system can be supplied when (re)installing a dedicated server
 // (for more information on how to install dedicated servers via the API refer to the API documentation).
-func (a *Api) OSes(queryParams map[string]interface{}) (*OperatingSystems, error) {
+func (a *DSApi) OSes(queryParams map[string]interface{}) (*OperatingSystems, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/operatingSystems%s", query)
 
@@ -726,7 +726,7 @@ func (a *Api) OSes(queryParams map[string]interface{}) (*OperatingSystems, error
 // installing the given operating system on a dedicated server.
 // For some operating systems these defaults can be adjusted when making the POST request to /install.
 // If the configurable parameter is true these defaults can be adjusted by the client
-func (a *Api) OS(operatingSystemId string, controlPanelId string) (*OSParams, error) {
+func (a *DSApi) OS(operatingSystemId string, controlPanelId string) (*OSParams, error) {
 
 	uri := fmt.Sprintf("/operatingSystems/%s?controlPanelId=%s", operatingSystemId, controlPanelId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -738,7 +738,7 @@ func (a *Api) OS(operatingSystemId string, controlPanelId string) (*OSParams, er
 
 // An id of a control panel can be supplied when (re)installing a dedicated server
 // (for more information on how to install dedicated servers via the API refer to the API documentation).
-func (a *Api) ControlPanels(queryParams map[string]interface{}) (*ControlPanels, error) {
+func (a *DSApi) ControlPanels(queryParams map[string]interface{}) (*ControlPanels, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/controlPanels%s", query)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -748,7 +748,7 @@ func (a *Api) ControlPanels(queryParams map[string]interface{}) (*ControlPanels,
 	return r, err
 }
 
-func (a *Api) RescueImages(queryParams map[string]interface{}) (*RescueImages, error) {
+func (a *DSApi) RescueImages(queryParams map[string]interface{}) (*RescueImages, error) {
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/rescueImages%s", query)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
