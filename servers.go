@@ -3,7 +3,6 @@ package lwapi
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 )
 
 // List your Dedicated Servers. This api call supports pagination.
@@ -486,7 +485,6 @@ func (a *Api) ServerBandwidthMetrics(serverID uint64, params *BandwidthMetrics) 
 	}
 
 	query := MakeQuery(queryParams)
-	log.Println(query)
 	uri := fmt.Sprintf("/servers/%d/metrics/bandwidth%s", serverID, query)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
