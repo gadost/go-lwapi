@@ -412,7 +412,7 @@ type LastClientRequest struct {
 
 type ServerDHCPLeaseNew struct {
 	Bootfile string `json:"bootfile"`
-	Hostname string `json:"hostname"`
+	Hostname string `json:"hostname,omitempty"`
 }
 
 type Job struct {
@@ -494,12 +494,12 @@ type HardwareScanJob struct {
 }
 
 type InstallationJob struct {
-	ControlPanelID    string      `json:"controlPanelId"`
-	Device            string      `json:"device"`
-	Hostname          string      `json:"hostname"`
+	ControlPanelID    string      `json:"controlPanelId,omitempty"`
+	Device            string      `json:"device,omitempty"`
+	Hostname          string      `json:"hostname,omitempty"`
 	OperatingSystemID string      `json:"operatingSystemId"`
-	Partitions        []Partition `json:"partitions"`
-	SSHKeys           string      `json:"sshKeys"`
+	Partitions        []Partition `json:"partitions,omitempty"`
+	SSHKeys           string      `json:"sshKeys,omitempty"`
 }
 
 type Partition struct {
@@ -522,10 +522,10 @@ type Jobs struct {
 }
 
 type RescueModeJob struct {
-	CallbackURL   string `json:"callbackUrl"`
-	PowerCycle    bool   `json:"powerCycle"`
+	CallbackURL   string `json:"callbackUrl,omitempty"`
+	PowerCycle    bool   `json:"powerCycle,omitempty"`
 	RescueImageID string `json:"rescueImageId"`
-	SSHKeys       string `json:"sshKeys"`
+	SSHKeys       string `json:"sshKeys,omitempty"`
 
 	Error
 }
@@ -603,6 +603,12 @@ type NotificationSetting struct {
 }
 
 type NotificationRequest struct {
+	Frequency string `json:"frequency"`
+	Threshold string `json:"threshold"`
+	Unit      string `json:"unit"`
+}
+
+type DataTrafficNotificationRequest struct {
 	Frequency string `json:"frequency"`
 	Threshold string `json:"threshold"`
 	Unit      string `json:"unit"`
@@ -697,4 +703,20 @@ type RescueImages struct {
 type RescueImage struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type NetworkType string
+type CredType string
+type ControlPanelID int
+
+type BandwidthMetrics struct {
+	From        string
+	To          string
+	Aggregation string
+}
+
+type DatatrafficMetrics struct {
+	From        string
+	To          string
+	Aggregation string
 }

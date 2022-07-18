@@ -2,8 +2,8 @@ package lwapi
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"log"
 )
 
 // List your Dedicated Servers. This api call supports pagination.
@@ -78,15 +78,9 @@ func (a *Api) ServerIP(serverID uint64, serverIP string) (*ServerIP, error) {
 // Advanced DDoS protection.
 func (a *Api) ServerIPUpdate(serverID uint64, serverIP string, params *UpdateIPRequest) (
 	*ServerIP, error) {
-	switch params.DetectionProfile {
-	case "ADVANCED_DEFAULT":
-	case "ADVANCED_LOW_UDP":
-	case "ADVANCED_MED_UDP":
-	case "":
-	default:
-		return nil, errors.New("DetectionProfile should be one of ADVANCED_DEFAULT ADVANCED_LOW_UDP ADVANCED_MED_UDP")
+	if err := params.Validate(); err != nil {
+		return nil, err
 	}
-
 	uri := fmt.Sprintf("/servers/%d/ips/%s", serverID, serverIP)
 	payload, _ := json.Marshal(params)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
@@ -162,15 +156,10 @@ func (a *Api) ServerNetworkInterfacesOpen(serverID uint64) (*NetworkInterfacesLi
 }
 
 // List the network interfaces of the given type of this server, including their status.
-func (a *Api) ServerNetworkInterface(serverID uint64, networkType string) (*NetworkInterface, error) {
-	switch networkType {
-	case "public":
-	case "internal":
-	case "remoteManagement":
-	default:
-		return nil, errors.New("networkType should be one of public internal remoteManagement")
+func (a *Api) ServerNetworkInterface(serverID uint64, networkType NetworkType) (*NetworkInterface, error) {
+	if err := networkType.Validate(); err != nil {
+		return nil, err
 	}
-
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces/%s", serverID, networkType)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -180,13 +169,9 @@ func (a *Api) ServerNetworkInterface(serverID uint64, networkType string) (*Netw
 }
 
 // Close all network interfaces of this server.
-func (a *Api) ServerNetworkInterfaceClose(serverID uint64, networkType string) (*Error, error) {
-	switch networkType {
-	case "public":
-	case "internal":
-	case "remoteManagement":
-	default:
-		return nil, errors.New("networkType should be one of public internal remoteManagement")
+func (a *Api) ServerNetworkInterfaceClose(serverID uint64, networkType NetworkType) (*Error, error) {
+	if err := networkType.Validate(); err != nil {
+		return nil, err
 	}
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces/%s/close", serverID, networkType)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
@@ -197,13 +182,9 @@ func (a *Api) ServerNetworkInterfaceClose(serverID uint64, networkType string) (
 }
 
 // Open all network interfaces of the given type for this server.
-func (a *Api) ServerNetworkInterfaceOpen(serverID uint64, networkType string) (*Error, error) {
-	switch networkType {
-	case "public":
-	case "internal":
-	case "remoteManagement":
-	default:
-		return nil, errors.New("networkType should be one of public internal remoteManagement")
+func (a *Api) ServerNetworkInterfaceOpen(serverID uint64, networkType NetworkType) (*Error, error) {
+	if err := networkType.Validate(); err != nil {
+		return nil, err
 	}
 	uri := fmt.Sprintf("/servers/%d/networkInterfaces/%s/open", serverID, networkType)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
@@ -229,18 +210,16 @@ func (a *Api) ServerPrivateNetworkDelete(serverID uint64, privateNetworkID int) 
 // It takes a few minutes before the server has access to the private network.
 // To get the current status of the server you can call api.Server(ID).
 // Once the server is added to the private network the status changes from CONFIGURING to CONFIGURED.
-func (a *Api) ServerPrivateNetworkAdd(
-	serverID uint64, privateNetworkID int, linkSpeed int) (*Error, error) {
-	switch linkSpeed {
-	case 100:
-	case 1000:
-	case 10000:
-	default:
-		return nil, errors.New("linkSpeed should be one of 100 1000 10000")
-	}
-	payload, _ := json.Marshal(&LinkSpeed{
+func (a *Api) ServerPrivateNetworkAdd(serverID uint64, privateNetworkID int, linkSpeed int) (*Error, error) {
+	ls := &LinkSpeed{
 		LinkSpeed: linkSpeed,
-	})
+	}
+	if err := ls.Validate(); err != nil {
+		return nil, err
+	}
+
+	payload, _ := json.Marshal(ls)
+
 	uri := fmt.Sprintf("/servers/%d/privateNetworks/%d", serverID, privateNetworkID)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
 
@@ -298,7 +277,6 @@ func (a *Api) ServerActiveJobCancel(serverID uint64) (*Job, error) {
 // Often you want to cancel the job, resulting in a server reboot.
 // In that case\nuse the /cancelActiveJob API call instead.
 func (a *Api) ServerActiveJobExpire(serverID uint64) (*Job, error) {
-
 	uri := fmt.Sprintf("/servers/%d/expireActiveJob", serverID)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "POST")
 
@@ -330,7 +308,10 @@ func (a *Api) ServerHardwareScan(serverID uint64, powerCycle bool, callbackUrl s
 // You are now able to target a specific diskset, like SATA1TB, SATA2TB, SSD256GB, etc.
 // To see which disksets are available in your server check the /v2/servers/{serverId} endpoint
 // and look for the corresponding diskset id from the hdd array.
-func (a *Api) ServerInstalationLaunch(serverID uint64, params *InstallationJob) (*Job, error) {
+func (a *Api) ServerInstallationLaunch(serverID uint64, params *InstallationJob) (*Job, error) {
+	if err := params.Validate(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/install", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -386,6 +367,9 @@ func (a *Api) ServerJob(serverID uint64, jobID int) (*Job, error) {
 // To get a list of available rescue images,
 // you could do so by sending a GET request to /bareMetals/v2/rescueImages.
 func (a *Api) ServerRescueMode(serverID uint64, params *RescueModeJob) (*Job, error) {
+	if err := params.Validate(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/rescueMode", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -413,17 +397,8 @@ func (a *Api) ServerCredentials(
 // The ability to update credentials is for convenience only.
 // It provides a secure way to communicate passwords with Leaseweb engineers in case support is required.
 func (a *Api) ServerCredentialNew(serverID uint64, params *Credential) (*Credential, error) {
-	switch params.Type {
-	case "OPERATING_SYSTEM":
-	case "CONTROL_PANEL":
-	case "REMOTE_MANAGEMENT":
-	case "RESCUE_MODE":
-	case "SWITCH":
-	case "PDU":
-	case "FIREWALL":
-	case "LOAD_BALANCER":
-	default:
-		return nil, errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL REMOTE_MANAGEMENT RESCUE_MODE SWITCH PDU FIREWALL LOAD_BALANCER")
+	if err := params.Validate(); err != nil {
+		return nil, err
 	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/credentials", serverID)
@@ -436,18 +411,9 @@ func (a *Api) ServerCredentialNew(serverID uint64, params *Credential) (*Credent
 
 // List all the credentials filtered by the specified type that are associated with this server.
 func (a *Api) ServerTypedCredentials(
-	serverID uint64, credType string, queryParams map[string]interface{}) (*Credentials, error) {
-	switch credType {
-	case "OPERATING_SYSTEM":
-	case "CONTROL_PANEL":
-	case "REMOTE_MANAGEMENT":
-	case "RESCUE_MODE":
-	case "SWITCH":
-	case "PDU":
-	case "FIREWALL":
-	case "LOAD_BALANCER":
-	default:
-		return nil, errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL REMOTE_MANAGEMENT RESCUE_MODE SWITCH PDU FIREWALL LOAD_BALANCER")
+	serverID uint64, credType CredType, queryParams map[string]interface{}) (*Credentials, error) {
+	if err := credType.Validate(); err != nil {
+		return nil, err
 	}
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/credentials/%s%s", serverID, credType, query)
@@ -461,18 +427,9 @@ func (a *Api) ServerTypedCredentials(
 // This action is purely administrative and will only remove the username
 // and password associated with this resource from our database.
 func (a *Api) ServerUsernameCredentialDelete(
-	serverID uint64, credType string, username string) (*Error, error) {
-	switch credType {
-	case "OPERATING_SYSTEM":
-	case "CONTROL_PANEL":
-	case "REMOTE_MANAGEMENT":
-	case "RESCUE_MODE":
-	case "SWITCH":
-	case "PDU":
-	case "FIREWALL":
-	case "LOAD_BALANCER":
-	default:
-		return nil, errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL REMOTE_MANAGEMENT RESCUE_MODE SWITCH PDU FIREWALL LOAD_BALANCER")
+	serverID uint64, credType CredType, username string) (*Error, error) {
+	if err := credType.Validate(); err != nil {
+		return nil, err
 	}
 	uri := fmt.Sprintf("/servers/%d/credentials/%s/%s", serverID, credType, username)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "DELETE")
@@ -485,18 +442,9 @@ func (a *Api) ServerUsernameCredentialDelete(
 // View the password for the given credential, identified by type and username.
 // Auto generated credentials (during a re-install, rescue mode or ipmi reset can be found here).
 func (a *Api) ServerUsernameTypedCredentials(
-	serverID uint64, credType string, username string) (*Credential, error) {
-	switch credType {
-	case "OPERATING_SYSTEM":
-	case "CONTROL_PANEL":
-	case "REMOTE_MANAGEMENT":
-	case "RESCUE_MODE":
-	case "SWITCH":
-	case "PDU":
-	case "FIREWALL":
-	case "LOAD_BALANCER":
-	default:
-		return nil, errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL REMOTE_MANAGEMENT RESCUE_MODE SWITCH PDU FIREWALL LOAD_BALANCER")
+	serverID uint64, credType CredType, username string) (*Credential, error) {
+	if err := credType.Validate(); err != nil {
+		return nil, err
 	}
 	uri := fmt.Sprintf("/servers/%d/credentials/%s/%s", serverID, credType, username)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -511,19 +459,14 @@ func (a *Api) ServerUsernameTypedCredentials(
 // This action is purely administrative and will only update the password
 // associated with this resource in our database.
 func (a *Api) ServerCredentialUpdate(
-	serverID uint64, credType string, username string, params *Password) (*Credential, error) {
-	switch credType {
-	case "OPERATING_SYSTEM":
-	case "CONTROL_PANEL":
-	case "REMOTE_MANAGEMENT":
-	case "RESCUE_MODE":
-	case "SWITCH":
-	case "PDU":
-	case "FIREWALL":
-	case "LOAD_BALANCER":
-	default:
-		return nil, errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL REMOTE_MANAGEMENT RESCUE_MODE SWITCH PDU FIREWALL LOAD_BALANCER")
+	serverID uint64, credType CredType, username string, params *Password) (*Credential, error) {
+	if err := credType.Validate(); err != nil {
+		return nil, err
 	}
+	if err := params.Validate(); err != nil {
+		return nil, err
+	}
+
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/credentials/%s/%s", serverID, credType, username)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -534,8 +477,16 @@ func (a *Api) ServerCredentialUpdate(
 }
 
 // At this moment only bandwidth information for the public interface is supported.
-func (a *Api) ServerBandwidthMetrics(serverID uint64, queryParams map[string]interface{}) (*Metrics, error) {
+func (a *Api) ServerBandwidthMetrics(serverID uint64, params *BandwidthMetrics) (*Metrics, error) {
+	var queryParams map[string]interface{}
+	if ok, err := params.Validate(); err != nil {
+		return nil, err
+	} else {
+		queryParams = ok
+	}
+
 	query := MakeQuery(queryParams)
+	log.Println(query)
 	uri := fmt.Sprintf("/servers/%d/metrics/bandwidth%s", serverID, query)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
@@ -545,7 +496,14 @@ func (a *Api) ServerBandwidthMetrics(serverID uint64, queryParams map[string]int
 }
 
 // At this moment only bandwidth information for the public interface is supported.
-func (a *Api) ServerDatatraficMetrics(serverID uint64, queryParams map[string]interface{}) (*Metrics, error) {
+func (a *Api) ServerDatatraficMetrics(serverID uint64, params *DatatrafficMetrics) (*Metrics, error) {
+	var queryParams map[string]interface{}
+	if ok, err := params.Validate(); err != nil {
+		return nil, err
+	} else {
+		queryParams = ok
+	}
+
 	query := MakeQuery(queryParams)
 	uri := fmt.Sprintf("/servers/%d/metrics/datatraffic%s", serverID, query)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
@@ -570,6 +528,9 @@ func (a *Api) ServerBandwidthNotifications(
 // Create a new bandwidth notification setting for this server.
 func (a *Api) ServerBandwidthNotificationNew(
 	serverID uint64, params *NotificationRequest) (*NotificationResponse, error) {
+	if err := params.Validete(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/bandwidth", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -603,6 +564,9 @@ func (a *Api) ServerBandwidthNotification(
 // Update an existing bandwidth notification setting for this server.
 func (a *Api) ServerBandwidthNotificationUpdate(
 	serverID uint64, notificationSettingId int, params *NotificationRequest) (*NotificationResponse, error) {
+	if err := params.Validete(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/bandwidth/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
@@ -626,7 +590,10 @@ func (a *Api) ServerDatatrafficNotifications(
 
 // Create a new datatraffic notification setting for this server.
 func (a *Api) ServerDatatrafficNotificationNew(
-	serverID uint64, params *NotificationRequest) (*NotificationResponse, error) {
+	serverID uint64, params *DataTrafficNotificationRequest) (*NotificationResponse, error) {
+	if err := params.Validete(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/datatraffic", serverID)
 	bodyResp, err := a.NewRequest(payload, uri, "POST")
@@ -659,7 +626,12 @@ func (a *Api) ServerDatatrafficNotification(
 
 // Update an existing datatraffic notification setting for this server.
 func (a *Api) ServerDatatrafficNotificationUpdate(
-	serverID uint64, notificationSettingId int, params *NotificationRequest) (*NotificationResponse, error) {
+	serverID uint64,
+	notificationSettingId int,
+	params *DataTrafficNotificationRequest) (*NotificationResponse, error) {
+	if err := params.Validete(); err != nil {
+		return nil, err
+	}
 	payload, _ := json.Marshal(params)
 	uri := fmt.Sprintf("/servers/%d/notificationSettings/datatraffic/%d", serverID, notificationSettingId)
 	bodyResp, err := a.NewRequest(payload, uri, "PUT")
@@ -756,9 +728,9 @@ func (a *Api) OSes(queryParams map[string]interface{}) (*OperatingSystems, error
 // installing the given operating system on a dedicated server.
 // For some operating systems these defaults can be adjusted when making the POST request to /install.
 // If the configurable parameter is true these defaults can be adjusted by the client
-func (a *Api) OS(operatingSystemId string, queryParams map[string]interface{}) (*OSParams, error) {
-	query := MakeQuery(queryParams)
-	uri := fmt.Sprintf("/operatingSystems/%s%s", operatingSystemId, query)
+func (a *Api) OS(operatingSystemId string, controlPanelId string) (*OSParams, error) {
+
+	uri := fmt.Sprintf("/operatingSystems/%s?controlPanelId=%s", operatingSystemId, controlPanelId)
 	bodyResp, err := a.NewRequest(NilPayload, uri, "GET")
 
 	var r *OSParams

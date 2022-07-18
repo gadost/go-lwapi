@@ -18,9 +18,22 @@ import (
 )
 func main() {
     api := lwapi.New("testtoken").DedicatedServers()
-    api.BaseURL = server.URL
 
     resp, err := api.ServerReferenceUpdate(12345, &lwapi.Reference{Reference: "test-server"})
     ...
 }
+```
+
+## Query params
+
+```go
+api := lwapi.New("testtoken").DedicatedServers()
+
+q := make(map[string]interface{})
+q["limit"] = 20
+q["privateNetworkEnabled"] = "true"
+q["ip"] = "127.0.0.1"
+
+resp, err := api.Servers(q)
+...
 ```

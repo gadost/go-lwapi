@@ -1,6 +1,7 @@
 package lwapi_test
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -639,7 +640,7 @@ func TestServerHardwareScan(t *testing.T) {
 	assert.Equal(t, s.Flow, "#stop")
 }
 
-func TestServerInstalationLaunch(t *testing.T) {
+func TestServerInstallationLaunch(t *testing.T) {
 	// Start a local HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Test request parameters
@@ -655,7 +656,7 @@ func TestServerInstalationLaunch(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerInstalationLaunch(12345, &lwapi.InstallationJob{})
+	s, e := api.ServerInstallationLaunch(12345, &lwapi.InstallationJob{OperatingSystemID: "s"})
 	if e != nil {
 		t.Error(e)
 	}
@@ -751,7 +752,7 @@ func TestServerRescueMode(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerRescueMode(12345, &lwapi.RescueModeJob{})
+	s, e := api.ServerRescueMode(12345, &lwapi.RescueModeJob{RescueImageID: "s"})
 	if e != nil {
 		t.Error(e)
 	}
@@ -805,8 +806,8 @@ func TestServerCredentialNew(t *testing.T) {
 
 	s, e := api.ServerCredentialNew(12345, &lwapi.Credential{
 		Type:     "OPERATING_SYSTEM",
-		Username: "",
-		Password: "",
+		Username: "user",
+		Password: "pass",
 		Error:    lwapi.Error{},
 	})
 	if e != nil {
@@ -924,7 +925,7 @@ func TestServerCredentialUpdate(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerCredentialUpdate(12345, "RESCUE_MODE", "s", &lwapi.Password{})
+	s, e := api.ServerCredentialUpdate(12345, "RESCUE_MODE", "s", &lwapi.Password{Password: "pass"})
 	if e != nil {
 		t.Error(e)
 	}
@@ -937,7 +938,7 @@ func TestServerBandwidthMetrics(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Test request parameters
 		rw.Header().Set("Content-Type", "application/json")
-		assert.Equal(t, req.URL.String(), "/bareMetals/v2/servers/12345/metrics/bandwidth")
+		assert.Equal(t, req.URL.String(), "/bareMetals/v2/servers/12345/metrics/bandwidth?from=2016-10-20T09:00:00Z&to=2016-10-20T09:00:00Z&aggregation=95TH")
 		assert.Equal(t, req.Method, "GET")
 		// Send response to be tested
 		rw.Write([]byte(`{"_metadata":{"aggregation":"AVG","from":"2016-10-20T09:00:00Z","granularity":"HOUR","to":"2016-10-20T11:00:00Z"},"metrics":{"DOWN_PUBLIC":{"unit":"bps","values":[{"timestamp":"2016-10-20T09:00:00Z","value":202499},{"timestamp":"2016-10-20T10:00:00Z","value":29900}]},"UP_PUBLIC":{"unit":"bps","values":[{"timestamp":"2016-10-20T09:00:00Z","value":43212393},{"timestamp":"2016-10-20T10:00:00Z","value":12342929}]}}}`))
@@ -948,7 +949,12 @@ func TestServerBandwidthMetrics(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerBandwidthMetrics(12345, v)
+	s, e := api.ServerBandwidthMetrics(12345, &lwapi.BandwidthMetrics{
+		From:        "2016-10-20T09:00:00Z",
+		To:          "2016-10-20T09:00:00Z",
+		Aggregation: "95TH",
+	})
+	log.Print(s)
 	if e != nil {
 		t.Error(e)
 	}
@@ -961,7 +967,7 @@ func TestServerDatatraficMetrics(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Test request parameters
 		rw.Header().Set("Content-Type", "application/json")
-		assert.Equal(t, req.URL.String(), "/bareMetals/v2/servers/12345/metrics/datatraffic")
+		assert.Equal(t, req.URL.String(), "/bareMetals/v2/servers/12345/metrics/datatraffic?from=2016-10-20T09:00:00Z&to=2016-10-20T09:00:00Z&aggregation=SUM")
 		assert.Equal(t, req.Method, "GET")
 		// Send response to be tested
 		rw.Write([]byte(`{"_metadata":{"aggregation":"SUM","from":"2016-10-20T09:00:00Z","granularity":"HOUR","to":"2016-10-20T11:00:00Z"},"metrics":{"DOWN_PUBLIC":{"unit":"B","values":[{"timestamp":"2016-10-20T09:00:00Z","value":202499},{"timestamp":"2016-10-20T10:00:00Z","value":29900}]},"UP_PUBLIC":{"unit":"B","values":[{"timestamp":"2016-10-20T09:00:00Z","value":43212393},{"timestamp":"2016-10-20T10:00:00Z","value":12342929}]}}}`))
@@ -972,7 +978,11 @@ func TestServerDatatraficMetrics(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerDatatraficMetrics(12345, v)
+	s, e := api.ServerDatatraficMetrics(12345, &lwapi.DatatrafficMetrics{
+		From:        "2016-10-20T09:00:00Z",
+		To:          "2016-10-20T09:00:00Z",
+		Aggregation: "SUM",
+	})
 	if e != nil {
 		t.Error(e)
 	}
@@ -1020,7 +1030,11 @@ func TestServerBandwidthNotificationNew(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerBandwidthNotificationNew(12345, &lwapi.NotificationRequest{})
+	s, e := api.ServerBandwidthNotificationNew(12345, &lwapi.NotificationRequest{
+		Frequency: "DAILY",
+		Threshold: "s",
+		Unit:      "Mbps",
+	})
 	if e != nil {
 		t.Error(e)
 	}
@@ -1092,7 +1106,11 @@ func TestServerBandwidthNotificationUpdate(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerBandwidthNotificationUpdate(12345, 1, &lwapi.NotificationRequest{})
+	s, e := api.ServerBandwidthNotificationUpdate(12345, 1, &lwapi.NotificationRequest{
+		Frequency: "DAILY",
+		Threshold: "s",
+		Unit:      "Mbps",
+	})
 	if e != nil {
 		t.Error(e)
 	}
@@ -1140,7 +1158,11 @@ func TestServerDatatrafficNotificationNew(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerDatatrafficNotificationNew(12345, &lwapi.NotificationRequest{})
+	s, e := api.ServerDatatrafficNotificationNew(12345, &lwapi.DataTrafficNotificationRequest{
+		Frequency: "DAILY",
+		Threshold: "s",
+		Unit:      "MB",
+	})
 	if e != nil {
 		t.Error(e)
 	}
@@ -1212,7 +1234,11 @@ func TestServerDatatrafficNotificationUpdate(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.ServerDatatrafficNotificationUpdate(12345, 1, &lwapi.NotificationRequest{})
+	s, e := api.ServerDatatrafficNotificationUpdate(12345, 1, &lwapi.DataTrafficNotificationRequest{
+		Frequency: "DAILY",
+		Threshold: "s",
+		Unit:      "GB",
+	})
 	if e != nil {
 		t.Error(e)
 	}
@@ -1403,7 +1429,7 @@ func TestOS(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		// Test request parameters
 		rw.Header().Set("Content-Type", "application/json")
-		assert.Equal(t, req.URL.String(), "/bareMetals/v2/operatingSystems/s")
+		assert.Equal(t, req.URL.String(), "/bareMetals/v2/operatingSystems/s?controlPanelId=s")
 		assert.Equal(t, req.Method, "GET")
 		// Send response to be tested
 		rw.Write([]byte(`{"architecture":"64bit","configurable":true,"defaults":{"device":"SATA_SAS","partitions":[{"bootable":true,"filesystem":"ext2","mountpoint":"\/boot","primary":true,"size":1024},{"filesystem":"swap","size":4096},{"filesystem":"ext4","mountpoint":"\/tmp","size":4096},{"filesystem":"ext4","mountpoint":"\/","primary":true,"size":"*"}]},"family":"ubuntu","features":["PARTITIONING","SW_RAID","TIMEZONE","HOSTNAME","SSH_KEYS","POST_INSTALL_SCRIPTS"],"id":"UBUNTU_20_04_64BIT","name":"Ubuntu 20.04 LTS (Focal Fossa) (amd64)","supportedBootDevices":["SATA_SAS","NVME"],"supportedFileSystems":["ext2","ext3","ext4","xfs","swap"],"type":"linux","version":"20.04"}`))
@@ -1414,7 +1440,7 @@ func TestOS(t *testing.T) {
 	api := lwapi.New("testtoken").DedicatedServers()
 	api.BaseURL = server.URL
 
-	s, e := api.OS("s", v)
+	s, e := api.OS("s", "s")
 	if e != nil {
 		t.Error(e)
 	}
