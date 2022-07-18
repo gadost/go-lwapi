@@ -17,9 +17,16 @@ import (
     "github.com/gadost/go-lwapi"
 )
 func main() {
+    // Dedicated Server AAPI
     api := lwapi.New("testtoken").DedicatedServers()
 
     resp, err := api.ServerReferenceUpdate(12345, &lwapi.Reference{Reference: "test-server"})
+    ...
+
+    // Virtual Server API
+    api := lwapi.New("testtoken").VirtualServers()
+
+    resp, err := api.VirtualServer(12345)
     ...
 }
 ```

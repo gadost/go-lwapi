@@ -1512,3 +1512,276 @@ func TestFormatISO8601(t *testing.T) {
 	assert.Equal(t, s, "2021-03-16T01:01:44Z")
 
 }
+
+func TestFormatRFC3339(t *testing.T) {
+	c, _ := time.Parse("2006-01-02T15:04:05Z07:00", "2021-03-16T01:01:44+00:00")
+	s := lwapi.FormatRFC3339(c)
+	assert.Equal(t, s, "2021-03-16T01:01:44Z")
+
+}
+
+func TestVirtualServers(t *testing.T) {
+	// Start a local HTTP server
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers")
+		assert.Equal(t, req.Method, "GET")
+		// Send response to be tested
+		rw.Write([]byte(`{"virtualServers":[{"id":"222903","reference":"Web server","customerId":"1301178860","dataCenter":"AMS-01","cloudServerId":null,"state":"STOPPED","firewallState":"DISABLED","template":"Ubuntu 14.04 64 40 20140707T1340","serviceOffering":"S","sla":"Bronze","contract":{"id":"30000778","startsAt":"2016-02-01T00:00:00+0200","endsAt":"2017-01-31T00:00:00+0200","billingCycle":12,"billingFrequency":"MONTH","pricePerFrequency":4.7,"currency":"EUR"},"hardware":{"cpu":{"cores":1},"memory":{"unit":"MB","amount":1024},"storage":{"unit":"GB","amount":40}},"iso":null,"ips":[{"ip":"10.11.116.130","version":4,"type":"PUBLIC"}]},{"id":"301708","reference":null,"customerId":"1301178860","dataCenter":"AMS-01","cloudServerId":null,"state":"STOPPED","firewallState":"ENABLED","template":"CentOS 7.0 64 60 20140711T1039","serviceOffering":"M","sla":"Bronze","contract":{"id":"30000779","startsAt":"2016-02-01T00:00:00+0200","endsAt":"2017-01-31T00:00:00+0200","billingCycle":12,"billingFrequency":"MONTH","pricePerFrequency":4.7,"currency":"EUR"},"hardware":{"cpu":{"cores":2},"memory":{"unit":"MB","amount":2048},"storage":{"unit":"GB","amount":60}},"iso":{"id":"9eadbe14-69be-4dee-8f56-5ebb23bb3c33","name":"Knoppix","displayName":"Knoppix"},"ips":[{"ip":"10.11.116.132","version":4,"type":"PUBLIC"}]}],"_metadata":{"totalCount":2,"offset":0,"limit":10}}`))
+
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+
+	v := make(map[string]interface{})
+	s, e := api.VirtualServers(v)
+	if e != nil {
+		t.Error(e)
+	}
+	//assert.Equal(, s.Metadata.Limit, 2)
+	assert.Equal(t, s.VirtualServers[0].ID, "222903")
+	assert.Equal(t, s.Metadata.TotalCount, 2)
+
+}
+
+func TestVirtualServer(t *testing.T) {
+	// Start a local HTTP server
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345")
+		assert.Equal(t, req.Method, "GET")
+		// Send response to be tested
+		rw.Write([]byte(`{"id":"222903","reference":"Web server","customerId":"1301178860","dataCenter":"AMS-01","cloudServerId":null,"state":"STOPPED","firewallState":"DISABLED","template":"Ubuntu 14.04 64 40 20140707T1340","serviceOffering":"S","sla":"Bronze","contract":{"id":"30000778","startsAt":"2016-02-01T00:00:00+0200","endsAt":"2017-01-31T00:00:00+0200","billingCycle":12,"billingFrequency":"MONTH","pricePerFrequency":4.7,"currency":"EUR"},"hardware":{"cpu":{"cores":1},"memory":{"unit":"MB","amount":1024},"storage":{"unit":"GB","amount":40}},"iso":{"id":"9eadbe14-69be-4dee-8f56-5ebb23bb3c33","name":"Knoppix","displayName":"Knoppix"},"ips":[{"ip":"10.11.116.130","version":4,"type":"PUBLIC"}]}`))
+
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+
+	s, e := api.VirtualServer(12345)
+	if e != nil {
+		t.Error(e)
+	}
+	//assert.Equal(, s.Metadata.Limit, 2)
+	assert.Equal(t, s.ID, "222903")
+	assert.Equal(t, s.CustomerID, "1301178860")
+}
+
+func TestVirtualServerReferenceUpdate(t *testing.T) {
+	// Start a local HTTP server
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		// Test request parameters
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345")
+		assert.Equal(t, req.Method, "PUT")
+		// Send response to be tested
+		rw.Write([]byte(`{"id":"222903","reference":"Web server","customerId":"1301178860","dataCenter":"AMS-01","cloudServerId":null,"state":"STOPPED","firewallState":"DISABLED","template":"Ubuntu 14.04 64 40 20140707T1340","serviceOffering":"S","sla":"Bronze","contract":{"id":"30000778","startsAt":"2016-02-01T00:00:00+0200","endsAt":"2017-01-31T00:00:00+0200","billingCycle":12,"billingFrequency":"MONTH","pricePerFrequency":4.7,"currency":"EUR"},"hardware":{"cpu":{"cores":1},"memory":{"unit":"MB","amount":1024},"storage":{"unit":"GB","amount":40}},"iso":{"id":"9eadbe14-69be-4dee-8f56-5ebb23bb3c33","name":"Knoppix","displayName":"Knoppix"},"ips":[{"ip":"10.11.116.130","version":4,"type":"PUBLIC"}]}`))
+
+	}))
+	// Close the server when test finishes
+	defer server.Close()
+
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+
+	s, e := api.VirtualServerReferenceUpdate(12345, &lwapi.Reference{
+		Reference: "test.example.com",
+	})
+
+	if e != nil {
+		t.Error(e)
+	}
+	//assert.Equal(, s.Metadata.Limit, 2)
+	assert.Equal(t, s.ID, "222903")
+	assert.Equal(t, s.CustomerID, "1301178860")
+}
+
+func TestVirtualServerPowerOn(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/powerOn")
+		assert.Equal(t, req.Method, "POST")
+		rw.Write([]byte(err))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerPowerOn(12345)
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.ErrorCode, "APP00800")
+}
+
+func TestVirtualServerPowerOff(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/powerOff")
+		assert.Equal(t, req.Method, "POST")
+		rw.Write([]byte(err))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerPowerOff(12345)
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.ErrorCode, "APP00800")
+}
+
+func TestVirtualServerReboot(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/reboot")
+		assert.Equal(t, req.Method, "POST")
+		rw.Write([]byte(err))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerReboot(12345)
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.ErrorCode, "APP00800")
+}
+
+func TestVirtualServerReinstall(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/reinstall")
+		assert.Equal(t, req.Method, "POST")
+		rw.Write([]byte(err))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerReinstall(12345, "test")
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.ErrorCode, "APP00800")
+}
+
+func TestVirtualServerCredentialUpdate(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/credentials")
+		assert.Equal(t, req.Method, "PUT")
+		rw.Write([]byte(err))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerCredentialUpdate(12345, &lwapi.VirtualServerCredentialUpdate{
+		Username: "user",
+		Password: "pass",
+		Type:     "OPERATING_SYSTEM",
+	})
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.ErrorCode, "APP00800")
+}
+
+func TestVirtualServerCredentials(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/credentials/OPERATING_SYSTEM")
+		assert.Equal(t, req.Method, "GET")
+		rw.Write([]byte(`{"credentials":[{"type":"OPERATING_SYSTEM","username":"root"}],"_metadata":{"totalCount":1,"offset":0,"limit":10}}`))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerCredentials(12345, "OPERATING_SYSTEM", v)
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.Credentials[0].Type, "OPERATING_SYSTEM")
+}
+
+func TestVirtualServerUserCredentials(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/credentials/OPERATING_SYSTEM/username")
+		assert.Equal(t, req.Method, "GET")
+		rw.Write([]byte(`{
+			"type": "OPERATING_SYSTEM",
+			"username": "root",
+			"password": "password123"
+		  }`))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerUserCredentials(12345, "OPERATING_SYSTEM", "username")
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.Type, "OPERATING_SYSTEM")
+}
+
+func TestVirtualServerDatatraficMetrics(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.Path, "/cloud/v2/virtualServers/12345/metrics/datatraffic")
+		assert.Equal(t, req.Method, "GET")
+		rw.Write([]byte(`{"_metadata":{"from":"2016-01-01T00:00:00+00:00","to":"2016-01-31T23:59:59+00:00","granularity":"DAY","aggregation":"SUM"},"metrics":{"DATATRAFFIC_UP":{"unit":"B","values":[{"timestamp":"2016-01-01T23:59:59+00:00","value":900},{"timestamp":"2016-01-31T23:59:59+00:00","value":2500}]},"DATATRAFFIC_DOWN":{"unit":"B","values":[{"timestamp":"2016-01-01T23:59:59+00:00","value":90},{"timestamp":"2016-01-31T23:59:59+00:00","value":250}]}}}`))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerDatatraficMetrics(12345, &lwapi.DatatrafficMetrics{
+		From:        "2016-10-20T09:00:00Z",
+		To:          "2016-10-20T09:00:00Z",
+		Aggregation: "SUM",
+	})
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.Metrics.DatatrafficDown.Unit, "B")
+}
+
+func TestVirtualServerTemplates(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		assert.Equal(t, req.URL.String(), "/cloud/v2/virtualServers/12345/templates")
+		assert.Equal(t, req.Method, "GET")
+		rw.Write([]byte(`{"_metadata":{"totalCount":2,"limit":10,"offset":0},"templates":[{"id":"WINDOWS_SERVER_2012_R2_STANDARD_64","name":"Windows Server 2012 R2 Standard (64-bit)"},{"id":"CENTOS_7_64_PLESK","name":"CentOS 7 (64-bit) Plesk"}]}`))
+
+	}))
+	defer server.Close()
+	api := lwapi.New("testtoken").VirtualServers()
+	api.BaseURL = server.URL
+	s, e := api.VirtualServerTemplates(12345)
+
+	if e != nil {
+		t.Error(e)
+	}
+	assert.Equal(t, s.Templates[0].ID, "WINDOWS_SERVER_2012_R2_STANDARD_64")
+}

@@ -706,17 +706,128 @@ type RescueImage struct {
 }
 
 type NetworkType string
+
 type CredType string
+
 type ControlPanelID int
+
+type VirtualCredType string
 
 type BandwidthMetrics struct {
 	From        string
 	To          string
 	Aggregation string
+	Granularity string
 }
 
 type DatatrafficMetrics struct {
 	From        string
 	To          string
 	Aggregation string
+	Granularity string
+}
+
+type VirtualServers struct {
+	VirtualServers []VirtualServer `json:"virtualServers"`
+	Metadata       Metadata        `json:"_metadata"`
+
+	Error
+}
+
+type VirtualServer struct {
+	ID              string                `json:"id"`
+	Reference       string                `json:"reference"`
+	CustomerID      string                `json:"customerId"`
+	DataCenter      string                `json:"dataCenter"`
+	CloudServerID   interface{}           `json:"cloudServerId"`
+	State           string                `json:"state"`
+	FirewallState   string                `json:"firewallState"`
+	Template        string                `json:"template"`
+	ServiceOffering string                `json:"serviceOffering"`
+	SLA             string                `json:"sla"`
+	Contract        VirtualServerContract `json:"contract"`
+	Hardware        VirtualServerHardware `json:"hardware"`
+	Iso             ISO                   `json:"iso"`
+	Ips             []VirtualServerIP     `json:"ips"`
+
+	Error
+}
+
+type ISO struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"displayName"`
+}
+type VirtualServerIP struct {
+	IP      string `json:"ip"`
+	Version int    `json:"version"`
+	Type    string `json:"type"`
+}
+
+type VirtualServerContract struct {
+	ID                string  `json:"id"`
+	StartsAt          string  `json:"startsAt"`
+	EndsAt            string  `json:"endsAt"`
+	BillingCycle      int     `json:"billingCycle"`
+	BillingFrequency  string  `json:"billingFrequency"`
+	PricePerFrequency float64 `json:"pricePerFrequency"`
+	Currency          string  `json:"currency"`
+}
+
+type VirtualServerCPU struct {
+	Cores int `json:"cores"`
+}
+
+type VirtualServerMemory struct {
+	Unit   string `json:"unit"`
+	Amount int    `json:"amount"`
+}
+
+type VirtualServerStorage struct {
+	Unit   string `json:"unit"`
+	Amount int    `json:"amount"`
+}
+
+type VirtualServerHardware struct {
+	CPU     VirtualServerCPU     `json:"cpu"`
+	Memory  VirtualServerMemory  `json:"memory"`
+	Storage VirtualServerStorage `json:"storage"`
+}
+
+type OperatingSystemID struct {
+	OperatingSystemID string `json:"operatingSystemId"`
+}
+
+type VirtualServerCredentialUpdate struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Type     string `json:"type"`
+}
+
+type VirtualServerDatatraficMetrics struct {
+	Metadata MetricsMetadata               `json:"_metadata"`
+	Metrics  VirtualServerDatatraficMetric `json:"metrics"`
+}
+
+type Datatraffic struct {
+	Unit   string `json:"unit"`
+	Values []struct {
+		Timestamp time.Time `json:"timestamp"`
+		Value     int       `json:"value"`
+	} `json:"values"`
+}
+
+type VirtualServerDatatraficMetric struct {
+	DatatrafficUp   Datatraffic `json:"DATATRAFFIC_UP"`
+	DatatrafficDown Datatraffic `json:"DATATRAFFIC_DOWN"`
+}
+
+type Templates struct {
+	Metadata  Metadata   `json:"_metadata"`
+	Templates []Template `json:"templates"`
+}
+
+type Template struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }

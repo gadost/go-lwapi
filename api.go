@@ -15,6 +15,7 @@ const (
 	BaseURL                  = "https://api.leaseweb.com"
 	ServiceTypeDedicated     = "bareMetals"
 	ServiceTypeVirtualServer = "virtualServers"
+	ServiceTypeCloud         = "cloud"
 )
 
 var NilPayload []byte
@@ -59,7 +60,7 @@ func (a *Api) entrypoint() string {
 	case ServiceTypeDedicated:
 		return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeDedicated, APIVer)
 	case ServiceTypeVirtualServer:
-		return fmt.Sprintf("%s/%s", a.BaseURL, ServiceTypeVirtualServer)
+		return fmt.Sprintf("%s/%s/%s/%s", a.BaseURL, ServiceTypeCloud, APIVer, ServiceTypeVirtualServer)
 	default:
 		return ""
 	}
@@ -199,6 +200,17 @@ func (c CredType) Validate() error {
 	return nil
 }
 
+func (c VirtualCredType) Validate() error {
+	switch c {
+	case "OPERATING_SYSTEM":
+	case "CONTROL_PANEL":
+
+	default:
+		return errors.New("credType should be one of OPERATING_SYSTEM CONTROL_PANEL")
+	}
+	return nil
+}
+
 func (p Password) Validate() error {
 	switch p.Password {
 	case "":
@@ -223,6 +235,9 @@ func (m BandwidthMetrics) Validate() (map[string]interface{}, error) {
 	q["from"] = m.From
 	q["to"] = m.To
 	q["aggregation"] = m.Aggregation
+	if m.Granularity != "" {
+		q["granularity"] = m.Granularity
+	}
 	return q, nil
 }
 
@@ -240,6 +255,9 @@ func (m DatatrafficMetrics) Validate() (map[string]interface{}, error) {
 	q["from"] = m.From
 	q["to"] = m.To
 	q["aggregation"] = m.Aggregation
+	if m.Granularity != "" {
+		q["granularity"] = m.Granularity
+	}
 	return q, nil
 }
 
@@ -290,4 +308,31 @@ func (n DataTrafficNotificationRequest) Validete() error {
 
 func FormatISO8601(t time.Time) string {
 	return t.UTC().Format("2006-01-02T15:04:05Z07:00")
+}
+
+func FormatRFC3339(t time.Time) string {
+	return t.UTC().Format("2006-01-02T15:04:05Z07:00")
+}
+
+func (v VirtualServerCredentialUpdate) Validate() error {
+	switch v.Password {
+	case "":
+		return errors.New("password can't be empty")
+	default:
+	}
+
+	switch v.Username {
+	case "":
+		return errors.New("username can't be empty")
+	default:
+
+	}
+
+	switch v.Type {
+	case "OPERATING_SYSTEM":
+	case "CONTROL_PANEL":
+	default:
+		return errors.New("type should be one of CONTROL_PANEL OPERATING_SYSTEM")
+	}
+	return nil
 }
