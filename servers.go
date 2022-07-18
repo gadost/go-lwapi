@@ -511,7 +511,7 @@ func (a *Api) ServerDatatraficMetrics(serverID uint64, params *DatatrafficMetric
 	return r, err
 }
 
-// List all bandwith notification settings for this server.
+// List all bandwidth notification settings for this server.
 func (a *Api) ServerBandwidthNotifications(
 	serverID uint64, queryParams map[string]interface{}) (*BandwidthNotification, error) {
 	query := MakeQuery(queryParams)
