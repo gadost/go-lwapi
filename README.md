@@ -37,3 +37,11 @@ q["ip"] = "127.0.0.1"
 resp, err := api.Servers(q)
 ...
 ```
+
+## Time helper ISO-8601
+
+```go
+ to := FormatISO8601(time.Now().Add(60*time.Day))
+```
+
+returns time in ISO-8601 format

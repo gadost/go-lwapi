@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gadost/go-lwapi"
 	"github.com/stretchr/testify/assert"
@@ -1503,4 +1504,11 @@ func TestRescueImages(t *testing.T) {
 	}
 
 	assert.Equal(t, s.RescueImages[0].ID, "GRML")
+}
+
+func TestFormatISO8601(t *testing.T) {
+	c, _ := time.Parse("2006-01-02T15:04:05Z07:00", "2021-03-16T01:01:44+00:00")
+	s := lwapi.FormatISO8601(c)
+	assert.Equal(t, s, "2021-03-16T01:01:44Z")
+
 }

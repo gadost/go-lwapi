@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -285,4 +286,8 @@ func (n DataTrafficNotificationRequest) Validete() error {
 		return errors.New("unit should be one of GB MB TB")
 	}
 	return nil
+}
+
+func FormatISO8601(t time.Time) string {
+	return t.UTC().Format("2006-01-02T15:04:05Z07:00")
 }
