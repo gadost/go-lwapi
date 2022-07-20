@@ -1,5 +1,7 @@
 # go-lwapi
 
+Leaseweb Dedicated & Virtual Servers V2 JSON-RPC API in Golang
+
 [![Build Status](https://travis-ci.org/gadost/go-lwapi.svg?branch=main)](https://travis-ci.org/gadost/go-lwapi) [![GoDoc](https://godoc.org/github.com/gadost/go-lwapi?status.svg)](https://godoc.org/github.com/gadost/go-lwapi)   [![codecov](https://codecov.io/gh/gadost/go-lwapi/branch/main/graph/badge.svg)](https://codecov.io/gh/gadost/go-lwapi) [![Go Report Card](https://goreportcard.com/badge/github.com/gadost/go-lwapi)](https://goreportcard.com/report/github.com/gadost/go-lwapi)
 
 ## Install
