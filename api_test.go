@@ -205,9 +205,23 @@ func TestServerIPUpdate(t *testing.T) {
 	if e != nil {
 		t.Error(e)
 	}
-	//assert.Equal(, s.Metadata.Limit, 2)
 	assert.Equal(t, s.Ddos.DetectionProfile, "ADVANCED_DEFAULT")
 	assert.Equal(t, s.FloatingIP, false)
+
+	_, e = api.ServerIPUpdate(12345, "127.0.0.1", &lwapi.UpdateIPRequest{
+		DetectionProfile: "ADVANCED_LOW_UDP",
+		ReverseLookup:    "example.com",
+	})
+	if e != nil {
+		t.Error(e)
+	}
+	_, e = api.ServerIPUpdate(12345, "127.0.0.1", &lwapi.UpdateIPRequest{
+		DetectionProfile: "ADVANCED_MED_UDP",
+		ReverseLookup:    "example.com",
+	})
+	if e != nil {
+		t.Error(e)
+	}
 
 	// Empty profile test
 

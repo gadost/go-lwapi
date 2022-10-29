@@ -20,6 +20,13 @@ type VSApi struct {
 	ServiceType string
 }
 
+type AbuseApi struct {
+	BaseURL     string
+	conn        *http.Client
+	Token       string
+	ServiceType string
+}
+
 type DSApi struct {
 	BaseURL     string
 	conn        *http.Client
@@ -837,4 +844,79 @@ type Templates struct {
 type Template struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type Message struct {
+	Body string `json:"body"`
+}
+
+type Messages struct {
+	Messages []struct {
+		PostedBy   string    `json:"postedBy"`
+		PostedAt   time.Time `json:"postedAt"`
+		Body       string    `json:"body"`
+		Attachment struct {
+			ID       string `json:"id"`
+			MimeType string `json:"mimeType"`
+			Filename string `json:"filename"`
+		} `json:"attachment,omitempty"`
+	} `json:"messages"`
+	Metadata Metadata `json:"_metadata"`
+}
+
+type Reports struct {
+	Reports  []ReportShort `json:"reports"`
+	Metadata Metadata      `json:"_metadata"`
+}
+
+type ReportShort struct {
+	ID            string    `json:"id"`
+	Subject       string    `json:"subject"`
+	Status        string    `json:"status"`
+	ReportedAt    time.Time `json:"reportedAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
+	Notifier      string    `json:"notifier"`
+	CustomerID    string    `json:"customerId"`
+	LegalEntityID string    `json:"legalEntityId"`
+	Deadline      time.Time `json:"deadline"`
+}
+
+type Report struct {
+	ID                  string   `json:"id"`
+	Subject             string   `json:"subject"`
+	Status              string   `json:"status"`
+	AbuseType           string   `json:"abuseType"`
+	Reopened            bool     `json:"reopened"`
+	ReportedAt          string   `json:"reportedAt"`
+	UpdatedAt           string   `json:"updatedAt"`
+	Notifier            string   `json:"notifier"`
+	CustomerID          string   `json:"customerId"`
+	LegalEntityID       string   `json:"legalEntityId"`
+	Body                string   `json:"body"`
+	Deadline            string   `json:"deadline"`
+	DetectedIPAddresses []string `json:"detectedIpAddresses"`
+	DetectedDomainNames []struct {
+		Name        string   `json:"name"`
+		IPAddresses []string `json:"ipAddresses"`
+	} `json:"detectedDomainNames"`
+	Attachments []struct {
+		ID       string `json:"id"`
+		MimeType string `json:"mimeType"`
+		Filename string `json:"filename"`
+	} `json:"attachments"`
+	TotalMessagesCount int `json:"totalMessagesCount"`
+	LatestMessages     []struct {
+		PostedBy   string    `json:"postedBy"`
+		PostedAt   time.Time `json:"postedAt"`
+		Body       string    `json:"body"`
+		Attachment struct {
+			ID       string `json:"id"`
+			MimeType string `json:"mimeType"`
+			Filename string `json:"filename"`
+		} `json:"attachment,omitempty"`
+	} `json:"latestMessages"`
+}
+
+type Resolutions struct {
+	Resolutions []string `json:"resolutions"`
 }

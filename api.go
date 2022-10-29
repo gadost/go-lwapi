@@ -11,16 +11,18 @@ import (
 )
 
 const (
-	APIVer                   = "v2"
+	APIVer2                  = "v2"
+	APIVer1                  = "v1"
 	BaseURL                  = "https://api.leaseweb.com"
 	ServiceTypeDedicated     = "bareMetals"
+	ServiceTypeAbuse         = "abuse"
 	ServiceTypeVirtualServer = "virtualServers"
 	ServiceTypeCloud         = "cloud"
 )
 
 var NilPayload []byte
 
-//New Api
+// New Api
 func New(token string) *Token {
 	return &Token{
 		Token: token,
@@ -46,6 +48,15 @@ func (t *Token) DedicatedServers() *DSApi {
 	}
 }
 
+func (t *Token) Abuse() *AbuseApi {
+	return &AbuseApi{
+		BaseURL:     BaseURL,
+		conn:        connect(),
+		Token:       t.Token,
+		ServiceType: ServiceTypeDedicated,
+	}
+}
+
 func connect() *http.Client {
 	tl := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -56,11 +67,15 @@ func connect() *http.Client {
 }
 
 func (a *VSApi) entrypoint() string {
-	return fmt.Sprintf("%s/%s/%s/%s", a.BaseURL, ServiceTypeCloud, APIVer, ServiceTypeVirtualServer)
+	return fmt.Sprintf("%s/%s/%s/%s", a.BaseURL, ServiceTypeCloud, APIVer2, ServiceTypeVirtualServer)
 }
 
 func (a *DSApi) entrypoint() string {
-	return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeDedicated, APIVer)
+	return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeDedicated, APIVer2)
+}
+
+func (a *AbuseApi) entrypoint() string {
+	return fmt.Sprintf("%s/%s/%s", a.BaseURL, ServiceTypeAbuse, APIVer1)
 }
 
 func (a *VSApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
@@ -85,6 +100,27 @@ func (a *VSApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, 
 }
 
 func (a *DSApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
+	body := bytes.NewReader(payload)
+	req, err := http.NewRequest(reqType, a.entrypoint()+uri, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("x-lsw-auth", a.Token)
+
+	resp, err := a.conn.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	bodyResp, err := io.ReadAll(resp.Body)
+
+	return bodyResp, err
+}
+
+func (a *AbuseApi) NewRequest(payload []byte, uri string, reqType string) ([]byte, error) {
 	body := bytes.NewReader(payload)
 	req, err := http.NewRequest(reqType, a.entrypoint()+uri, body)
 	if err != nil {
